@@ -1,0 +1,9 @@
+{
+    "cmd":"INC",
+    "args": { "number": 49 }
+}
+
+{
+    "cmd": "WRITE",
+    "args": { "key": "test key", "value": "test value" }
+}

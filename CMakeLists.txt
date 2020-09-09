@@ -41,16 +41,16 @@ endif()
 
 project(server)
 
-# SET(SRC_LIST
-# 
-# )
+SET(SRC_LIST
+  src/Server.cpp
+)
 
 # SET(SRC_LIST_TESTS
 # 
 # )
 
 include_directories(src)
-add_executable(${PROJECT_NAME} src/main.cpp)
+add_executable(${PROJECT_NAME} src/main.cpp ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} PRIVATE -ljsoncpp)
 
 # add_executable(${PROJECT_NAME}-ut ${SRC_LIST_TESTS} ${SRC_LIST})
