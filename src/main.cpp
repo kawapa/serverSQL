@@ -9,8 +9,8 @@
 
 using namespace std::string_literals;
 
-// int main(int argc, char** argv) {
 int main() {
+// int main(int argc, char** argv) {
     // if (argc != 5) {
     //     return -1;
     // }
@@ -22,6 +22,8 @@ int main() {
     ServerSQL serverSQL(sql);
     Server server(serverSQL);
 
+
+
     // std::string write = R"({ "cmd": "WRITE", "args": { "key": "test key", "value": 11 }})"; 
     // std::cout << server.processQuery(write);
 
@@ -31,22 +33,14 @@ int main() {
     // std::string del = R"({ "cmd": "DEL", "args": { "key": "test id" }})"; 
     // std::cout << server.processQuery(del);
 
-    std::string get1 = R"({ "cmd": "GET", "args": { "number": 1 }})"; 
-    std::cout << server.processQuery(get1);
+    // std::string get1 = R"({ "cmd": "GET", "args": { "number": 1 }})"; 
+    // std::cout << server.processQuery(get1);
 
-    std::string get2 = R"({ "cmd": "GET", "args": { "number": 3 }})"; 
-    std::cout << server.processQuery(get2);
+    // std::string inc = R"({ "cmd": "INC", "args": { "number": 4 }})"; 
+    // std::cout << server.processQuery(inc);
 
-    std::string get3 = R"({ "cmd": "GET", "args": { "number": 4 }})"; 
-    std::cout << server.processQuery(get3);
-
-    // std::pair<std::string, std::string> p0("status", "ok");
-    // std::pair<std::string, std::string> p1("Bobek", "Pierwszy");
-    // std::pair<std::string, std::string> p2("Lobel", "Drugi");
-
-    // std::cout << server.generateAnswer({p2, p1, p0});
-
-    
+    std::string stat = "STAT"; 
+    std::cout << server.processQuery(stat);
 
     // try {
 

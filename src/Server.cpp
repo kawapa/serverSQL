@@ -1,24 +1,31 @@
 #include "Server.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <thread>
 
 using Answers = std::vector<std::pair<std::string, std::string>>;
 using namespace std::chrono_literals;
 
 Server::Server(ServerSQL& serverSQL) : serverSQL_(serverSQL) {
-    // whenServerStarted_ = std::chrono::steady_clock::now();
+    whenServerStarted_ = std::chrono::steady_clock::now();
 }
 
 std::string Server::processQuery(const std::string& query) {
+    if (query == "STAT") {
+        return displayStatus();
+    }
+
     reader_.parse(query, obj_);
     std::string command = obj_["cmd"].asString();
     Answers answer;
 
     if (command == "WRITE") {
         answer = serverSQL_.insertNewElement(obj_["args"]["key"].asString(),
-                                        obj_["args"]["value"].asUInt());
+                                             obj_["args"]["value"].asUInt());
     }
     else if (command == "READ") {
         answer = serverSQL_.getValue(obj_["args"]["key"].asString());
@@ -27,8 +34,10 @@ std::string Server::processQuery(const std::string& query) {
         answer = serverSQL_.deleteElement(obj_["args"]["key"].asString());
     }
     else if (command == "GET") {
-        std::cout << "SZUKANA: " << obj_["args"]["number"].asUInt() << std::endl;
         answer = serverSQL_.getOccurences(obj_["args"]["number"].asUInt());
+    }
+    else if (command == "INC") {
+        answer = serverSQL_.incrementValue(obj_["args"]["number"].asUInt());
     }
     else {
         return ERROR_;
@@ -43,14 +52,31 @@ std::string Server::generateAnswer(const Answers& answer) {
         val[pair.first] = pair.second;
     });
 
-    // for (int i = 0; i < answer.size(); ++i) {
-    //     std::cout << "i = " << i << std::endl;
-    //     val[answer[i].first] = answer[i].second;
-    // }
-
     Json::FastWriter fast;
     std::string sFast = fast.write(val);
 
-    //std::cout << sFast << '\n';
     return sFast;
+}
+
+std::string Server::displayStatus() {
+    // std::this_thread::sleep_for(5s);
+    auto now = std::chrono::steady_clock::now();
+    auto result = std::chrono::duration_cast<std::chrono::seconds>(now - whenServerStarted_).count();
+
+    std::stringstream ss;
+    ss << "Server has started " << result << " seconds ago";
+
+    return ss.str();
+}
+
+std::string Server::terminateConnection() {
+
+    return OK_;
+}
+
+
+std::string Server::sleepFor(int seconds) {
+    std::this_thread::sleep_for(30s);
+
+    return OK_;
 }
