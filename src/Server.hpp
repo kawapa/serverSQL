@@ -7,18 +7,20 @@
 #include <utility>
 #include <vector>
 
+using Answers = std::vector<std::pair<std::string, std::string>>;
+
 class Server {
 public:
     Server(ServerSQL& serverSQL);
 
     std::string processQuery(const std::string& query);
+    std::string generateAnswer(const Answers& answer);
 
 private:
     Json::Reader reader_;
     Json::Value obj_;
     Json::StyledStreamWriter writer_;
 
-    void generateAnswer(const std::vector<std::pair<std::string, std::string>>& answer);
     // std::chrono::steady_clock::time_point whenServerStarted_;
     ServerSQL& serverSQL_;
     const std::string ERROR_ = R"({ status: "error" })";

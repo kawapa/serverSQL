@@ -14,30 +14,43 @@ Server::Server(ServerSQL& serverSQL) : serverSQL_(serverSQL) {
 std::string Server::processQuery(const std::string& query) {
     reader_.parse(query, obj_);
     std::string command = obj_["cmd"].asString();
+    Answers answer;
 
     if (command == "WRITE") {
-        if (serverSQL_.insertNewElement(obj_["args"]["key"].asString(),
-                                        obj_["args"]["value"].asUInt())) {
-            return OK_;
-        }
+        answer = serverSQL_.insertNewElement(obj_["args"]["key"].asString(),
+                                        obj_["args"]["value"].asUInt());
     }
-    if (command == "READ") {
-        if (serverSQL_.getValue(obj_["args"]["key"].asString())) {
-            return OK_;
-        }
+    else if (command == "READ") {
+        answer = serverSQL_.getValue(obj_["args"]["key"].asString());
+    }
+    else if (command == "DEL") {
+        answer = serverSQL_.deleteElement(obj_["args"]["key"].asString());
+    }
+    else {
+        return ERROR_;
     }
 
-    return ERROR_;
+    return generateAnswer(answer);
 }
 
-void generateAnswer(const Answers& answer) {
+std::string Server::generateAnswer(const Answers& answer) {
     Json::Value val;
     std::for_each(begin(answer), end(answer), [&val](const auto& pair){
-        val[p.first] = p.second;
+        val[pair.first] = pair.second;
     });
 
-    Json::FastWriter fast;
-    string sFast = fast.write(val);
+    // for (int i = 0; i < answer.size(); ++i) {
+    //     std::cout << "i = " << i << std::endl;
+    //     val[answer[i].first] = answer[i].second;
+    // }
 
-    cout << sFast << '\n';
+    Json::FastWriter fast;
+    std::string sFast = fast.write(val);
+
+    //std::cout << sFast << '\n';
+    return sFast;
+}
+
+Answers Server::getOccurences(const std::string& query) {
+
 }
