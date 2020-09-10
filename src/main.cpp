@@ -28,8 +28,17 @@ int main() {
     // std::string read = R"({ "cmd": "READ", "args": { "key": "test key" }})"; 
     // std::cout << server.processQuery(read);
 
-    std::string del = R"({ "cmd": "DEL", "args": { "key": "test id" }})"; 
-    std::cout << server.processQuery(del);
+    // std::string del = R"({ "cmd": "DEL", "args": { "key": "test id" }})"; 
+    // std::cout << server.processQuery(del);
+
+    std::string get1 = R"({ "cmd": "GET", "args": { "number": 1 }})"; 
+    std::cout << server.processQuery(get1);
+
+    std::string get2 = R"({ "cmd": "GET", "args": { "number": 3 }})"; 
+    std::cout << server.processQuery(get2);
+
+    std::string get3 = R"({ "cmd": "GET", "args": { "number": 4 }})"; 
+    std::cout << server.processQuery(get3);
 
     // std::pair<std::string, std::string> p0("status", "ok");
     // std::pair<std::string, std::string> p1("Bobek", "Pierwszy");

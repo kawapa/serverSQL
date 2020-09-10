@@ -41,3 +41,24 @@ Answers ServerSQL::deleteElement(const std::string& key) {
 
     return {OK_};
 }
+
+Answers ServerSQL::getOccurences(int value) {
+    Answers answer;
+    rowset<row> rs = (sql_.prepare << "SELECT COUNT(*) FROM " << tableName_ <<
+    " WHERE value = :v", use(value, "v"));
+    
+    if (rs.begin() != rs.end()) {
+        answer.push_back(NOT_OK_);
+        answer.push_back({"hits"s, "0"});
+        return answer;
+    }
+    
+    answer.push_back(OK_);
+
+    for (rowset<row>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
+        const row& r = *it;
+        std::cout << r.get<int>(0) << " 1 " << std::endl;
+        // answer.push_back({"hits"s, std::to_string(r.get<int>(0))});
+    }
+    return answer;
+}

@@ -15,7 +15,7 @@ public:
     Answers insertNewElement(const std::string& key, int value); // WRITE
     Answers getValue(const std::string& key); // READ
     Answers deleteElement(const std::string& key);  // DEL
-    Answers getOccurences(const std::string& query); // GET
+    Answers getOccurences(int value); // GET
     Answers incrementValue(int value); // INC
 
 private:

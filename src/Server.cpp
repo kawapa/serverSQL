@@ -26,6 +26,10 @@ std::string Server::processQuery(const std::string& query) {
     else if (command == "DEL") {
         answer = serverSQL_.deleteElement(obj_["args"]["key"].asString());
     }
+    else if (command == "GET") {
+        std::cout << "SZUKANA: " << obj_["args"]["number"].asUInt() << std::endl;
+        answer = serverSQL_.getOccurences(obj_["args"]["number"].asUInt());
+    }
     else {
         return ERROR_;
     }
@@ -49,8 +53,4 @@ std::string Server::generateAnswer(const Answers& answer) {
 
     //std::cout << sFast << '\n';
     return sFast;
-}
-
-Answers Server::getOccurences(const std::string& query) {
-
 }
