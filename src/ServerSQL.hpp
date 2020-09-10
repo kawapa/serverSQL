@@ -5,17 +5,18 @@
 #include <jsoncpp/json/json.h>
 #include <string>
 
+using Answers = std::vector<std::pair<std::string, std::string>>;
 using namespace soci;
 
 class ServerSQL {
 public:
     ServerSQL(session& sql);
 
-    bool insertNewElement(const std::string& key, int value); // WRITE
-    int getValue(const std::string& key); // READ
-    bool deleteElement(const std::string& key);  // DEL
-    bool incrementValue(int value); // INC
-    int getOccurences(const std::string& query); // GET
+    Answers insertNewElement(const std::string& key, int value);
+    Answers getValue(const std::string& key); // READ
+    Answers deleteElement(const std::string& key);  // DEL
+    Answers incrementValue(int value); // INC
+    Answers getOccurences(const std::string& query); // GET
 
 private:
     session& sql_;

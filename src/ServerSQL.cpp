@@ -12,11 +12,35 @@ bool ServerSQL::insertNewElement(const std::string& key, int value) {
     return true;
 }
 
-// bool ServerSQL::insertNewElement(const std::string& key, int value) {
-//     sql_ << "INSERT INTO users(first_name, last_name, email) VALUES(:fn, :ln, :e)",
-//         use(first_name, "fn"), use(last_name, "ln"), use(email, "e");
-//     return true;
-// }
+bool ServerSQL::getValue(const std::string& key) {
+    rowset<row> rs = (sql_.prepare << "SELECT * FROM " << tableName_ <<
+                                      " WHERE id = '" << key << "'");
+    
+    // if (rs.begin() == rs.end()) {
+    //     std::cout << R"({ status: "error" })";
+    //     return false;
+    // }
+    for (rowset<row>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
+        const row& r = *it;
+        std::cout << r.get<std::string>(0) << std::endl;
+        std::cout << r.get<int>(1) << std::endl;
+    }
+
+    return true;
+}
+
+
+
+    // rowset<row> rs = (sql.prepare << "SELECT * FROM users"); 
+    // // Iterate through the result set 
+    // for (rowset<row>::const_iterator it = rs.begin(); 
+    //          it != rs.end(); ++it) { 
+    //     const row& r = *it;
+    //     std::cout << "ID: " << r.get<int>(0) << endl 
+    //         << "First Name: " << r.get<string>(1) << endl 
+    //         << "Last Name: " << r.get<string>(2) << endl 
+    //         << "Email: " << r.get<string>(3) << endl 
+    //         << "Active: " << r.get<int>(4) << endl << endl; 
 
 /*
 

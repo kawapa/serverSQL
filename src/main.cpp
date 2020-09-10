@@ -20,12 +20,11 @@ int main() {
     ServerSQL serverSQL(sql);
     Server server(serverSQL);
 
-    std::string write = R"({ "cmd": "WRITE", "args": { "key": "test key", "value": 1 }})"; 
-    std::cout << server.processQuery(write);
+    // std::string write = R"({ "cmd": "WRITE", "args": { "key": "test key", "value": 11 }})"; 
+    // std::cout << server.processQuery(write);
 
-    // std::string read = R"({ "cmd": "READ", "args": { "key": "test key" }})"; 
-    // std::cout << server.processQuery(read);
-    // std::cout << "Hello World!\n";
+    std::string read = R"({ "cmd": "READ", "args": { "key": "test key" }})"; 
+    std::cout << server.processQuery(read);
 
     
 
