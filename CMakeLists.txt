@@ -43,15 +43,20 @@ project(server)
 
 SET(SRC_LIST
   src/Server.cpp
+  src/ServerSQL.cpp
 )
 
 # SET(SRC_LIST_TESTS
 # 
 # )
 
-include_directories(src)
+include_directories(include
+  src
+  /usr/include/mariadb
+)
+
 add_executable(${PROJECT_NAME} src/main.cpp ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME} PRIVATE -ljsoncpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient)
 
 # add_executable(${PROJECT_NAME}-ut ${SRC_LIST_TESTS} ${SRC_LIST})
 

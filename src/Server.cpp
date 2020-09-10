@@ -5,23 +5,20 @@
 
 using namespace std::chrono_literals;
 
-Server::Server() {
-    whenServerStarted_ = std::chrono::steady_clock::now();
+Server::Server(ServerSQL& serverSQL) : serverSQL_(serverSQL) {
+    // whenServerStarted_ = std::chrono::steady_clock::now();
 }
 
-void Server::processJSON() {
-    std::ifstream ifs("1.json");
-    reader_.parse(ifs, obj_);
+std::string Server::processQuery(const std::string& query) {
+    reader_.parse(query, obj_);
+    std::string command = obj_["cmd"].asString();
 
-    auto command = obj_["cmd"].asString();
-    if (command == "STATS") {
-        std::cout << "znaleziono STATS" << std::endl;
+    if (command == "WRITE") {
+        if (serverSQL_.insertNewElement(obj_["args"]["key"].asString(),
+                                        obj_["args"]["value"].asUInt())) {
+            return OK_;
+        }
     }
- 
-    const Json::Value& parameters = obj_["args"];
-    for (int i = 0; i < parameters.size(); i++){
-        std::cout << "arg[" << i << "] "<< parameters[i]["name"].asString();
-        std::cout << " chapter: " << parameters[i]["chapter"].asUInt();
-        std::cout << std::endl;
-    }
+
+    return ERROR_;
 }

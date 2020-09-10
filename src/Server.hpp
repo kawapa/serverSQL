@@ -1,19 +1,23 @@
 #pragma once
 
+#include "ServerSQL.hpp"
+
 #include <chrono>
 #include <jsoncpp/json/json.h>
 
 class Server {
 public:
-    Server();
+    Server(ServerSQL& serverSQL);
 
-    void processJSON();
-    void print();
+    std::string processQuery(const std::string& query);
 
 private:
     Json::Reader reader_;
     Json::Value obj_;
     Json::StyledStreamWriter writer_;
 
-    std::chrono::steady_clock::time_point whenServerStarted_;
+    // std::chrono::steady_clock::time_point whenServerStarted_;
+    ServerSQL& serverSQL_;
+    const std::string ERROR_ = R"({ status: "error" })";
+    const std::string OK_ = R"({ "status": "ok" })";   
 };
