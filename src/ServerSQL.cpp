@@ -6,13 +6,13 @@ using namespace std::string_literals;
 
 ServerSQL::ServerSQL(session& sql) : sql_(sql) {}
 
-Answers ServerSQL::insertNewElement(const std::string& key, int value) {
+char* ServerSQL::insertNewElement(const std::string& key, int value) {
     sql_ << "INSERT INTO " << tableName_ << " " << "VALUES(:k, :v)",
         use(key, "k"), use(value, "v");
-    return {OK_};
+    return OK_;
 }
 
-Answers ServerSQL::getValue(const std::string& key) {
+Answers ServerSQL::getValue(const std::string& key) const {
     rowset<row> rs = (sql_.prepare << "SELECT * FROM " << tableName_ <<
                                       " WHERE id = '" << key << "'");
     
@@ -25,8 +25,6 @@ Answers ServerSQL::getValue(const std::string& key) {
 
     for (rowset<row>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
         const row& r = *it;
-        //std::cout << r.get<std::string>(0) << " 1 " << std::endl;
-        //std::cout << r.get<int>(1) << " 2 " << std::endl;
         answer.push_back({"value"s, std::to_string(r.get<int>(1))});
     }
 
@@ -39,7 +37,7 @@ Answers ServerSQL::deleteElement(const std::string& key) {
     return {OK_};
 }
 
-Answers ServerSQL::getOccurences(int value) {
+Answers ServerSQL::getOccurences(int value) const {
     Answers answer;
     int count;
 

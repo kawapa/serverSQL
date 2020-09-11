@@ -2,26 +2,38 @@
 
 #include "ServerSQL.hpp"
 
+#include <boost/asio.hpp>
 #include <chrono>
+#include <cstdlib>
 #include <jsoncpp/json/json.h>
 #include <utility>
 #include <vector>
 
 using Answers = std::vector<std::pair<std::string, std::string>>;
+using boost::asio::ip::udp;
+
+constexpr size_t MAX_MESSAGE_LENGTH = 512;
 
 class Server {
 public:
-    Server(ServerSQL& serverSQL);
+    Server(ServerSQL& serverSQL, boost::asio::io_context& io_context, short port);
 
-    std::string processQuery(const std::string& query);
-    std::string displayStatus();
-    std::string terminateConnection();
-    std::string sleepFor(int seconds);
+    void receive();
+    void send(std::size_t length);
+
+    void processQuery();
+    void displayStatus();
+    void terminateConnection();
+    void sleepFor(int seconds);
 
 private:
     Json::Reader reader_;
     Json::Value obj_;
     Json::StyledStreamWriter writer_;
+
+    udp::socket socket_;
+    udp::endpoint sender_endpoint_;
+    char data_[MAX_MESSAGE_LENGTH];
 
     std::string generateAnswer(const Answers& answer);
     std::chrono::steady_clock::time_point whenServerStarted_;
@@ -29,6 +41,6 @@ private:
     // int activeConnections = 0;
 
     ServerSQL& serverSQL_;
-    const std::string ERROR_ = R"({ status: "error" })";
-    const std::string OK_ = R"({ "status": "ok" })";   
+    char* OK_ = "ok";
+    char* notOK_ = "error";
 };

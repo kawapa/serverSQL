@@ -39,7 +39,7 @@ endif()
 
 # find_package(jsoncpp REQUIRED)
 
-project(server)
+project(server-client)
 
 SET(SRC_LIST
   src/Server.cpp
@@ -55,12 +55,16 @@ include_directories(include
   /usr/include/mariadb
 )
 
-add_executable(${PROJECT_NAME} src/main.cpp ${SRC_LIST})
-target_link_libraries(${PROJECT_NAME} PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient)
+add_executable(server src/main-server.cpp ${SRC_LIST})
+target_link_libraries(server PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lboost_system -lboost_thread -lpthread)
+
+add_executable(client src/main-client.cpp)
+target_link_libraries(client PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lboost_system -lboost_thread -lpthread)
+
 
 # add_executable(${PROJECT_NAME}-ut ${SRC_LIST_TESTS} ${SRC_LIST})
 
-target_compile_options(${PROJECT_NAME} PRIVATE)
+# target_compile_options(${PROJECT_NAME} PRIVATE)
 # target_compile_options(${PROJECT_NAME}-ut PRIVATE -Wall -Wextra -Werror -pedantic)
 
 # target_link_libraries(${PROJECT_NAME}-ut gtest_main)
