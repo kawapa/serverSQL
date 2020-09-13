@@ -5,11 +5,12 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <thread>
 
-using Answers = std::vector<std::pair<std::string, std::string>>;
+#include "Parser.hpp"
+
 using namespace std::chrono_literals;
+using namespace std::string_literals;
 
 Server::Server(ServerSQL& serverSQL, boost::asio::io_context& io_context, short port)
     : serverSQL_(serverSQL),
@@ -20,78 +21,84 @@ Server::Server(ServerSQL& serverSQL, boost::asio::io_context& io_context, short 
 }
 
 void Server::receive() {
+    input_ = std::make_unique<char[]>(MAX_MESSAGE_LENGTH);
+
     socket_.async_receive_from(
-        boost::asio::buffer(data_, MAX_MESSAGE_LENGTH), sender_endpoint_,
+        boost::asio::buffer(input_.get(), MAX_MESSAGE_LENGTH), sender_endpoint_,
         [this](boost::system::error_code error, std::size_t bytesReceived) {
             if (!error && bytesReceived > 0) {
-                data_ = processQuery(data_);
-                send(strlen(data_));
+                processQuery();
+                send();
             } else {
                 receive();
             }
-        });
+    });
 }
 
-void Server::send(std::size_t length) {
+void Server::send() {
     socket_.async_send_to(
-        boost::asio::buffer(data_, length), sender_endpoint_,
-        [this](boost::system::error_code /*ec*/, std::size_t /*bytes_sent*/) {
+        boost::asio::buffer(*output_), sender_endpoint_,
+        [this](boost::system::error_code, std::size_t) {
             receive();
         });
 }
 
 void Server::processQuery() {
-    if (std::equal(std::begin(data_), std::end(data_), "STAT")) {
-        displayStatus();
+    output_ = std::make_unique<std::string>();
+
+    if (strcmp(input_.get(), "END") == 0) {
+        *output_ = R"({ "status": "ok" })";
+        return;
+    }
+    else if (strcmp(input_.get(), "STAT") == 0) {
+        *output_ = R"({ "status": "ok" })";
+        return;
     }
 
-    reader_.parse(query, obj_);
+    reader_.parse(input_.get(), obj_);
     std::string command = obj_["cmd"].asString();
-    char answer[MAX_MESSAGE_LENGTH];
 
     if (command == "WRITE") {
-        answer = serverSQL_.insertNewElement(obj_["args"]["key"].asString(),
-                                             obj_["args"]["value"].asUInt());
-    } else if (command == "READ") {
-        answer = serverSQL_.getValue(obj_["args"]["key"].asString());
-    } else if (command == "DEL") {
-        answer = serverSQL_.deleteElement(obj_["args"]["key"].asString());
-    } else if (command == "GET") {
-        answer = serverSQL_.getOccurences(obj_["args"]["number"].asUInt());
-    } else if (command == "INC") {
-        answer = serverSQL_.incrementValue(obj_["args"]["number"].asUInt());
-    } else {
-        return ERROR_;
+        serverSQL_.insertNewElement(output_,
+                                    obj_["args"]["key"].asString(),
+                                    obj_["args"]["value"].asInt());       
     }
-
-    return generateAnswer(answer);
+    // else if (command == "READ") {
+    //     serverSQL_.getValue(output_,
+    //                         obj_["args"]["key"].asString());
+    // } else if (command == "DEL") {
+    //     serverSQL_.deleteElement(data_,
+    //                              obj_["args"]["key"].asString());
+    // } else if (command == "GET") {
+    //     serverSQL_.getOccurences(data_,
+    //                              obj_["args"]["number"].asUInt());
+    // } else if (command == "INC") {
+    //     serverSQL_.incrementValue(data_,
+    //                               obj_["args"]["number"].asUInt());
+    else if (command == "END") {
+        *output_ = R"({ "status": "ok" })";
+        // boost::system::error_code ignored_ec;
+        // socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_receive, ignored_ec);
+        // socket_.close();       
+    }
+    else {
+        *output_ = R"({ "status": "error" })";
+    }
 }
 
-std::string Server::generateAnswer(const Answers& answer) {
-    Json::Value val;
-    std::for_each(begin(answer), end(answer), [&val](const auto& pair) {
-        val[pair.first] = pair.second;
-    });
-
-    Json::FastWriter fast;
-    return fast.write(val);
-}
-
-void Server::displayStatus(char* message) {
+void Server::displayStatus() {
     auto now = std::chrono::steady_clock::now();
     auto result = std::chrono::duration_cast<std::chrono::seconds>(now - whenServerStarted_).count();
 
-    std::stringstream ss;
-    ss << "Server has started " << result << " seconds ago";
-    data_ = ss.str().c_str();
+    //Parser::generateAnswer(data_, "Server has started ", result, " seconds ago");
 }
 
-void Server::terminateConnection(char* message) {
-    data_ = OK_;
-    socket_.close();
-}
+// void Server::terminateConnection() {
+//     socket_.close();
+//     Parser::generateAnswer(data_, true);
+// }
 
-void Server::sleepFor(char* message, int seconds) {
-    std::this_thread::sleep_for(30s);
-    data_ = OK_;
-}
+// void Server::sleepFor(int seconds) {
+//     std::this_thread::sleep_for(30s);
+//     Parser::generateAnswer(data_, true);
+// }

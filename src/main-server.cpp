@@ -18,12 +18,16 @@ int main(int argc, char** argv) {
 
     try {
         // std::string login, password, database;
-        // std::cout << "Enter your LOGIN to MySQL database; ";
+        // std::cout << "Enter your LOGIN to MySQL server; ";
         // std::cin >> login;
-        // std::cout << "Enter your PASSWORD to MySQL database; ";
+        // std::cout << "Enter your PASSWORD to MySQL server; ";
         // std::cin >> password;
         // std::cout << "Enter the name of the database you'd like to access: ";
         // std::cin >> database;
+        // std::cout << "Enter the name of the table. Please note the table must have\n";
+        // std::cout << "... at least two columns: 'id' (for a string) and 'value' (for an integer).\n";
+        // std::cout << "Table name: ";
+        // std::cin >> tableName_;
 
         boost::asio::io_context io_context;
 
