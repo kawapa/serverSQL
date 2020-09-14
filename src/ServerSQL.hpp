@@ -29,3 +29,4 @@ private:
     std::string databaseName_;
     std::string tableName_ = "my_table";
 };
+#include <iterator>

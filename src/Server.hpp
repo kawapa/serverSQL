@@ -5,11 +5,8 @@
 #include <atomic>
 #include <boost/asio.hpp>
 #include <chrono>
-#include <cstdlib>
 #include <memory>
 #include <jsoncpp/json/json.h>
-#include <utility>
-#include <vector>
 
 using boost::asio::ip::udp;
 
@@ -24,11 +21,12 @@ public:
     void goSleepFor(int seconds) const;
     void showStatistics();
 
-    int getQueriesReceived() const;
-    int64_t getTimeFromStart() const;
 
 private:
     ServerSQL& serverSQL_;
+
+    int getQueriesReceived() const;
+    int64_t getTimeFromStart() const;
 
     udp::socket socket_;
     udp::endpoint sender_endpoint_;

@@ -1,18 +1,10 @@
 #include "Server.hpp"
 
-#include <algorithm>
-#include <cctype>
-#include <cstring>
-#include <fstream>
-#include <iostream>
 #include <thread>
 
 #include "Parser.hpp"
 
 constexpr size_t MAX_MESSAGE_LENGTH = 512;
-
-using namespace std::chrono_literals;
-using namespace std::string_literals;
 
 Server::Server(ServerSQL& serverSQL, boost::asio::io_context& io_context, short port)
     : serverSQL_(serverSQL),
@@ -96,6 +88,8 @@ void Server::goSleepFor(int seconds) const {
     std::this_thread::sleep_for(std::chrono::milliseconds(seconds * 1000));
 }
 
+void Server::showStatistics() { Parser::parseToClient(output_, getTimeFromStart(), getQueriesReceived()); }
+
 int64_t Server::getTimeFromStart() const {
     auto now = std::chrono::steady_clock::now();
     auto howLongActive = std::chrono::duration_cast<std::chrono::seconds>
@@ -105,5 +99,3 @@ int64_t Server::getTimeFromStart() const {
 }
 
 int Server::getQueriesReceived() const { return queriesReceived_; }
-
-void Server::showStatistics() { Parser::parseToClient(output_, getTimeFromStart(), getQueriesReceived()); }

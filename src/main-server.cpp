@@ -1,5 +1,4 @@
 #include <boost/asio.hpp>
-#include <cstdlib>
 #include <soci/soci.h>
 #include <soci/mysql/soci-mysql.h>
 #include <exception>

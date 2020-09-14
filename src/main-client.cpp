@@ -1,5 +1,4 @@
 #include <boost/asio.hpp>
-#include <cstdlib>
 #include <cstring>
 #include <iostream>
 
@@ -27,6 +26,7 @@ int main(int argc, char* argv[]) {
             resolver.resolve(udp::v4(), argv[1], argv[2]);
 
         bool keepGoing = true;
+
         while (keepGoing) {
             char request[MAX_MESSAGE_LENGTH];
             

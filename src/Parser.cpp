@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstring>
 #include <iterator>
-#include <jsoncpp/json/json.h>
 #include <sstream>
 
 using namespace std::string_literals;
