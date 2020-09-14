@@ -1,19 +1,13 @@
-#include <algorithm>
 #include <boost/asio.hpp>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <iterator>
-#include <jsoncpp/json/json.h>
-#include <sstream>
-#include <string>
-#include <vector>
+
+#include "Parser.hpp"
 
 constexpr size_t MAX_MESSAGE_LENGTH = 512;
+
 using namespace std::string_literals;
-
-void prepareMessage(char* messageString);
-
 using boost::asio::ip::udp;
 
 int main(int argc, char* argv[]) {
@@ -43,8 +37,9 @@ int main(int argc, char* argv[]) {
                 keepGoing = false;
             }
             if (strcmp(request, "STAT") != 0 && strcmp(request, "END") != 0) {
-                prepareMessage(request);
+                Parser::parseToServer(request);
             }
+            std::cout << "Message before sending to server: " << request;
             socket.send_to(boost::asio::buffer(request, MAX_MESSAGE_LENGTH), *endpoints.begin());
 
             udp::endpoint sender_endpoint;
@@ -61,28 +56,4 @@ int main(int argc, char* argv[]) {
     std::cout << "Exiting the client...\n";
 
     return 0;
-}
-
-void prepareMessage(char* messageString) {
-    Json::Value root;
-    Json::FastWriter fast;
-
-    std::istringstream iss(messageString);
-    std::vector<std::string> tokens;
-
-    std::copy(std::istream_iterator<std::string>(iss),
-              std::istream_iterator<std::string>(),
-              back_inserter(tokens));
-
-    root["cmd"] = tokens[0];
-    if (tokens[0] == "WRITE") {
-        for (int i = 1; i < tokens.size(); ) {
-            root["args"]["key"] = tokens[i];
-            root["args"]["value"] = std::stoi(tokens[i + 1]);
-            i += 2;
-        }
-    }
-
-    auto jsonString = fast.write(root);
-    strcpy(messageString, jsonString.c_str());
 }

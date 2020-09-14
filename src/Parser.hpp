@@ -1,32 +1,21 @@
 #pragma once
 
 #include <jsoncpp/json/json.h>
+#include <memory>
 #include <string>
-#include <utility>
-
-constexpr size_t MAX_ = 512;
+#include <vector>
 
 class Parser {
 public:
-    char* getmessage();
-    // static void generateAnswer(char* message, bool status);
-    // static void generateAnswer(char* message, std::pair<std::string, std::string>);
-    // static void generateAnswer(std::string message1, int64_t seconds, std::string message2);
+    static void parseToServer(char* messageString);
+
+    static void parseToClient(std::unique_ptr<std::string>& output, bool status);   
+    static void parseToClient(std::unique_ptr<std::string>& output, uint64_t seconds, int queriesReceived);
+    static void parseToClient(std::unique_ptr<std::string>& output,
+                              const std::string& cmd,
+                              const std::string& argument);
 
 private:
-    std::string message_[MAX_];
+    static std::string OK_;
+    static std::string notOK_;
 };
-
-
-/*
-
-std::string Server::generateAnswer(const Answers& answer) {
-    Json::Value val;
-    std::for_each(begin(answer), end(answer), [&val](const auto& pair) {
-        val[pair.first] = pair.second;
-    });
-
-    Json::FastWriter fast;
-    return fast.write(val);
-}
-*/

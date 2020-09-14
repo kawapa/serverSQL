@@ -9,6 +9,8 @@
 
 #include "Parser.hpp"
 
+constexpr size_t MAX_MESSAGE_LENGTH = 512;
+
 using namespace std::chrono_literals;
 using namespace std::string_literals;
 
@@ -29,6 +31,7 @@ void Server::receive() {
             if (!error && bytesReceived > 0) {
                 processQuery();
                 send();
+                queriesReceived_++;
             } else {
                 receive();
             }
@@ -45,60 +48,62 @@ void Server::send() {
 
 void Server::processQuery() {
     output_ = std::make_unique<std::string>();
+    auto inputCMD = input_.get();
 
-    if (strcmp(input_.get(), "END") == 0) {
-        *output_ = R"({ "status": "ok" })";
+    if (strcmp(inputCMD, "END") == 0) {
+        Parser::parseToClient(output_, true);
         return;
     }
     else if (strcmp(input_.get(), "STAT") == 0) {
-        *output_ = R"({ "status": "ok" })";
+        showStatistics();
         return;
     }
 
     reader_.parse(input_.get(), obj_);
-    std::string command = obj_["cmd"].asString();
+    std::string cmd = obj_["cmd"].asString();
 
-    if (command == "WRITE") {
+    if (cmd == "WRITE") {
         serverSQL_.insertNewElement(output_,
                                     obj_["args"]["key"].asString(),
                                     obj_["args"]["value"].asInt());       
     }
-    // else if (command == "READ") {
-    //     serverSQL_.getValue(output_,
-    //                         obj_["args"]["key"].asString());
-    // } else if (command == "DEL") {
-    //     serverSQL_.deleteElement(data_,
-    //                              obj_["args"]["key"].asString());
-    // } else if (command == "GET") {
-    //     serverSQL_.getOccurences(data_,
-    //                              obj_["args"]["number"].asUInt());
-    // } else if (command == "INC") {
-    //     serverSQL_.incrementValue(data_,
-    //                               obj_["args"]["number"].asUInt());
-    else if (command == "END") {
-        *output_ = R"({ "status": "ok" })";
-        // boost::system::error_code ignored_ec;
-        // socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_receive, ignored_ec);
-        // socket_.close();       
+    else if (cmd == "READ") {
+        serverSQL_.getValue(output_,
+                            obj_["args"]["key"].asString());
+    }
+    else if (cmd == "DEL") {
+        serverSQL_.deleteElement(output_,
+                                 obj_["args"]["key"].asString());
+    }
+    else if (cmd == "GET") {
+        serverSQL_.getOccurences(output_,
+                                 obj_["args"]["number"].asUInt());
+    }
+    else if (cmd == "INC") {
+        serverSQL_.incrementValue(output_,
+                                  obj_["args"]["number"].asUInt());
+    }
+    else if (cmd == "SLEEP") {
+        goSleepFor(obj_["args"]["delay"].asInt());
+        Parser::parseToClient(output_, true);
     }
     else {
-        *output_ = R"({ "status": "error" })";
+        Parser::parseToClient(output_, false);
     }
 }
 
-void Server::displayStatus() {
-    auto now = std::chrono::steady_clock::now();
-    auto result = std::chrono::duration_cast<std::chrono::seconds>(now - whenServerStarted_).count();
-
-    //Parser::generateAnswer(data_, "Server has started ", result, " seconds ago");
+void Server::goSleepFor(int seconds) const {
+    std::this_thread::sleep_for(std::chrono::milliseconds(seconds * 1000));
 }
 
-// void Server::terminateConnection() {
-//     socket_.close();
-//     Parser::generateAnswer(data_, true);
-// }
+int64_t Server::getTimeFromStart() const {
+    auto now = std::chrono::steady_clock::now();
+    auto howLongActive = std::chrono::duration_cast<std::chrono::seconds>
+                                (now - whenServerStarted_).count();
 
-// void Server::sleepFor(int seconds) {
-//     std::this_thread::sleep_for(30s);
-//     Parser::generateAnswer(data_, true);
-// }
+    return howLongActive;
+}
+
+int Server::getQueriesReceived() const { return queriesReceived_; }
+
+void Server::showStatistics() { Parser::parseToClient(output_, getTimeFromStart(), getQueriesReceived()); }

@@ -41,9 +41,14 @@ endif()
 
 project(server-client)
 
-SET(SRC_LIST
+SET(SRC_LIST_SERVER
+  src/Parser.cpp
   src/Server.cpp
   src/ServerSQL.cpp
+)
+
+SET(SRC_LIST_CLIENT
+  src/Parser.cpp
 )
 
 # SET(SRC_LIST_TESTS
@@ -55,10 +60,10 @@ include_directories(include
   /usr/include/mariadb
 )
 
-add_executable(server src/main-server.cpp ${SRC_LIST})
+add_executable(server src/main-server.cpp ${SRC_LIST_SERVER})
 target_link_libraries(server PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lboost_system -lboost_thread -lpthread)
 
-add_executable(client src/main-client.cpp)
+add_executable(client src/main-client.cpp ${SRC_LIST_CLIENT})
 target_link_libraries(client PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lboost_system -lboost_thread -lpthread)
 
 

@@ -1,6 +1,11 @@
 #include "ServerSQL.hpp"
 
 #include <iostream>
+#include <algorithm>
+#include <sstream>
+#include <iterator>
+
+#include "Parser.hpp"
 
 using namespace std::string_literals;
 
@@ -10,53 +15,88 @@ void ServerSQL::insertNewElement(std::unique_ptr<std::string>& output, const std
     sql_ << "INSERT INTO " << tableName_ << " " << "VALUES(:k, :v)",
         use(key, "k"), use(value, "v");
 
-    *output = OK_;
+    Parser::parseToClient(output, true);
 }
 
-// void ServerSQL::getValue(std::unique_ptr<std::string>& output, const std::string& key) {
-//     rowset<row> rs = (sql_.prepare << "SELECT * FROM " << tableName_ <<
-//                                       " WHERE id = '" << key << "'");
+void ServerSQL::getValue(std::unique_ptr<std::string>& output, const std::string& key) {
+    int valueExists = 0;
+    sql_ << "SELECT COUNT(*) FROM " << tableName_ << " WHERE id = '" << key << "'", into(valueExists);
+
+    if (!valueExists) {
+        Parser::parseToClient(output, "READ", "");
+        return;
+    }
+
+    //std::stringstream ss;
+    // // ss << "SELECT * FROM " << tableName_ << " WHERE id='" << key << "'";
+    //ss << "SELECT (value) FROM " << tableName_ << " WHERE id = \"" << key << "\"";
+    // //ss << "SELECT (value) FROM " << tableName_ ;
+    //auto str = ss.str();
+
+    //rowset<row> rs = (sql_.prepare << str);
+
+    rowset<row> rs = (sql_.prepare << "SELECT (value) FROM " << tableName_ << " WHERE id = \"" << key << "\"");
     
-//     if (rs.begin() == rs.end()) {
-//         tokens_.push_back(notOK_);
-//         return;
-//     }
+    // if (rs.begin() == rs.end()) {
+    //     Parser::parseToClient(output, false);
+    //     return;
+    // }
 
-//     tokens_.push_back(OK_);
+    // rowset<int>::const_iterator it = rs.begin();
+    // std::advance(it, 1);
+    // //tokens_->push_back(std::to_string(*it));
 
-//     for (rowset<row>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
-//         const row& r = *it;
-//         tokens_.push_back(std::to_string(r.get<int>(1)));
-//     }
+    int counter = 0;
+    rowset<row>::const_iterator it = rs.begin();
+    const row& r = *it;
+    counter += r.get<int>(0);
 
-// }
+    // for (rowset<row>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
+    //     const row& r = *it;
+    //     counter += r.get<int>(0);
+    // }
 
-// Answers ServerSQL::deleteElement(const std::string& key) {
-//     sql_ << "DELETE FROM " << tableName_ << " " << "WHERE id = '" << key << "'";
+    // *output = std::to_string(counter);
 
-//     return {OK_};
-// }
+    Parser::parseToClient(output, "READ", {std::to_string(counter)});
+}
 
-// Answers ServerSQL::getOccurences(int value) const {
-//     Answers answer;
-//     int count;
+void ServerSQL::deleteElement(std::unique_ptr<std::string>& output, const std::string& key) {
+    // int valueExists = 0;
+    // sql_ << "SELECT COUNT(*) FROM " << tableName_ << " WHERE value = " << value, into(valueExists);
 
-//     sql_ << "SELECT COUNT(*) FROM " << tableName_ << " WHERE value = " << value, into(count);
+    // if (!valueExists) {
+    //     Parser::parseToClient(output, false);
+    //     return;
+    // }
 
-//     if (count) {
-//         answer.push_back(OK_);
-//         answer.push_back({"hits"s, std::to_string(count)});
-//     }
-//     else {
-//         answer.push_back(NOT_OK_);
-//     }
+    sql_ << "DELETE FROM " << tableName_ << " " << "WHERE id = '" << key << "'";
 
-//     return answer;
-// }
+    Parser::parseToClient(output, true);
+}
 
-// Answers ServerSQL::incrementValue(int value) {
-//     Answers answer = getOccurences(value);
+void ServerSQL::getOccurences(std::unique_ptr<std::string>& output, int value) const {
+    int count = 0;
+    sql_ << "SELECT COUNT(*) FROM " << tableName_ << " WHERE value = " << value, into(count);
 
-//     sql_ << "UPDATE " << tableName_ << " SET value = value + 1";
-//     return answer;
-// }
+    Parser::parseToClient(output, "GET", {std::to_string(count)});
+}
+
+void ServerSQL::incrementValue(std::unique_ptr<std::string>& output, int value) {
+    int valueExists = 0;
+    sql_ << "SELECT COUNT(*) FROM " << tableName_ << " WHERE value = " << value, into(valueExists);
+
+    if (!valueExists) {
+        Parser::parseToClient(output, false);
+        return;
+    }
+    sql_ << "UPDATE my_table SET value = (value + 1) WHERE value = " << value;
+
+    int occurences = 0;
+    sql_ << "SELECT COUNT(*) FROM " << tableName_ << " WHERE value = " << value + 1, into(occurences);
+
+    std::stringstream ss;
+    ss << "Licznik " << value + 1 << " to: " << occurences;
+
+    Parser::parseToClient(output, "INC", {std::to_string(occurences)});
+}
