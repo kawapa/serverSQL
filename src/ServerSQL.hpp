@@ -5,7 +5,6 @@
 #include <jsoncpp/json/json.h>
 #include <memory>
 #include <string>
-#include <vector>
 
 using namespace std::string_literals;
 using namespace soci;

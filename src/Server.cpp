@@ -29,9 +29,9 @@ void Server::receive() {
         boost::asio::buffer(input_.get(), MAX_MESSAGE_LENGTH), sender_endpoint_,
         [this](boost::system::error_code error, std::size_t bytesReceived) {
             if (!error && bytesReceived > 0) {
+                queriesReceived_++;
                 processQuery();
                 send();
-                queriesReceived_++;
             } else {
                 receive();
             }
