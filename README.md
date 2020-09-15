@@ -1,105 +1,65 @@
-# Z Management <!-- omit in toc -->
+# Zdalny serwer MySQL <!-- omit in toc -->
 
-- [1. Treść zadania](#1-treść-zadania)
-- [2. Polecenia do obsługi komunikacji](#2-polecenia-do-obsługi-komunikacji)
-  - [`STAT`](#stat)
-  - [`INC`](#inc)
-  - [`GET`](#get)
-  - [`SLEEP`](#sleep)
-  - [`END`](#end)
-- [3. Polecenia do obsługi bazy danych](#3-polecenia-do-obsługi-bazy-danych)
-  - [`WRITE`](#write)
-  - [`READ`](#read)
-  - [`DEL`](#del)
-  - [Inne nieznane](#inne-nieznane)
-- [4. Warunki](#4-warunki)
+- [1. Instalacja:](#1-instalacja)
+- [2. Uruchomienie serwera](#2-uruchomienie-serwera)
+- [3. Uruchomienie klienta](#3-uruchomienie-klienta)
+- [4. Uruchomienie testów](#4-uruchomienie-testów)
+- [5. Funkcjonalności](#5-funkcjonalności)
+- [6. Warunki](#6-warunki)
+- [7. Inne](#7-inne)
 
-## 1. Treść zadania
+## 1. Instalacja:
 
-Zadaniem jest serwer pod Linuxa, który będzie:
+> `~/mkdir build`<br>
+> `~/cd buid`<br>
+> `~/cmake .. && make -j`
 
-- obsługiwał dowolną ilość równoległych połączeń (ograniczonych zasobami systemu)
-- odpowiadał możliwie najszybciej na wysyłane zapytania (powinny być obsługiwane równolegle)
-- przygotowany na problemy z transmisją,
-- utrzymywał przychodzące połączenia; zamknięcie powinno nastąpić tylko po zakończeniu połączenia przez klienta lub przy braku jego aktywności przez 30s
-- zapisywał przesłane informacje w bazie danych A (dowolna konstrukcja tabel)
-- odczytywał informacje z bazy danych A
-- zapisywał logi zapisu informacji (np. zmieniono wartoś X na Y) w odrębnej bazie B (dowolna konstrukcja tabel)
+## 2. Uruchomienie serwera
 
-Zapytania będą oparte na prostym protokole opakowanym w JSON:
+> `~/./server <PORT>`
 
-`{ "cmd": <POLECENIE>, "args": { ... } }`
+**Uwaga!** Do uruchomienia serwera wymagane jest:
+* Podanie loginu i hasła do lokalnego serwera MySQL
+* Podanie nazwy ***ISTNIEJĄCEJ*** bazy na serwerze MySQL
+* Podanie nazwy tabeli, w której będą przechowywane rekordy
+  * Jeśli tabela już istnieje, musi ona posiadać kolumny `id` oraz `value`
+  * Jeśli tabela nie istnieje, zostanie stworzona
 
-w odpowiedzi:
+## 3. Uruchomienie klienta
 
-`{ "status": "ok"/"error, ... }`
+> `~/./client <IP_SERWERA> <PORT>`
 
-## 2. Polecenia do obsługi komunikacji
+## 4. Uruchomienie testów
 
-### `STAT`
+> `~/./serverSQL-ut`
 
-`STAT` - serwer odsyła statystyki (w dowolnej postaci):
+Lub:
 
-- ilość czasu od uruchomienia serwer (w sekundach)
-- ilość czasu od nawiązania aktualnego połączenia (w sekundach)
-- ilość łącznie odebranych zapytań
-- ilość aktualnie utrzymywanych połączeń,
+> `~/./ctest -V`
 
-### `INC`
+## 5. Funkcjonalności
 
-`INC <liczba typu "long long">` - serwer zwiększa ilość wystąpień podanej liczby w swojej strukturze, będącej wspólną dla całego serwera (nie tylko dla aktualnego połączenia); w odpowiedzi zwracany jest aktualny licznik dla podanej liczby
+Serwer...
 
-`{ "cmd": "INC", "args": { "number": 49 }}` -> `{ "status": "ok", "hits": 4 }`
+- [x] ... obsługuje dowolną ilość równoległych połączeń (ograniczonych zasobami systemu)
+- [x] ... odpowiada możliwie najszybciej na wysyłane zapytania (są one obsługiwane równolegle)
+- [ ] ... jest przygotowany na problemy z transmisją
+- [x] ... utrzymuje przychodzące połączenia
+- [x] ... kończy połączenie z klientem na jego życzenie 
+- [ ] ... kończy połączenie przy braku aktywności klienta przez 30s
+- [x] ... zapisuje przesłane informacje w bazie danych A
+- [x] ... odczytuje informacje z bazy danych A
+- [x] ... zapisuej logi (historię komend) w oddzielnej bazie (nazwa oryginalnej tabeli z dopiskiem `_log`)
 
-### `GET`
+## 6. Warunki
 
-`GET <liczba typu "long long">` - zwraca ilość wystąpień podanej liczby,
+- [x] Serwer musi być przygotowany na równoległy dostęp (odczyt i zapis) do danych w kilku połączeniach
+- [x] Implementacja C++ z użyciem biblioteki Boost (http://www.boost.org/)
+- [x] Baza danych: mysql
+- [x] JSON z użyciem jsoncpp (https://github.com/open-source-parsers/jsoncpp)
 
-`{ "cmd": "GET", "args": { "number": 49 }}` -> `{ "status": "ok", "hits": 4 }`
+## 7. Inne
 
-### `SLEEP`
-
-`SLEEP <czas oczekiwania (int)>` - serwer czeka podaną ilość sekund, po czym odpowiada OK,
-
-`{ "cmd": "SLEEP", "args": { "delay": 10 }}` -> `{ "status": "ok" }`
-
-### `END`
-
-`END` - serwer odpowiada OK i kończy połączenie.
-
-`{ "cmd": "END" } -> { "status": "ok" }`
-
-... i rozłączenie
-
-## 3. Polecenia do obsługi bazy danych
-
-### `WRITE`
-
-`WRITE <klucz typu "string"> <wartość>` - zapisuje do bazy wartość w danym kluczy (lub zmienia istniejący)
-
-`{ "cmd": "WRITE", "args": { "key": "test key", "value": "test value" }}` -> `{ "status": "ok" }`
-
-### `READ`
-
-`READ <klucz>` - odsyła wartość klucza zapisaną w bazie (lub łańcuch pusty gdy nie ma)
-
-`{ "cmd": "READ", "args": { "key": "test key" }}` -> `{ "status": "ok", "value": "test value" }`
-
-### `DEL`
-
-`DEL <klucz>` - usuwa wartość klucza zapisaną w bazie
-
-`{ "cmd": "DEL", "args": { "key": "test key" }}` -> `{ "status": "ok" }`
-
-### Inne nieznane
-
-Jeżeli serwer otrzyma nieznane polecenie, powinień odesłać informację o błędzie:,
-
-np. `{ status: "error" }`
-
-## 4. Warunki
-
-- Serwer musi być przygotowany na równoległy dostęp (odczyt i zapis) do danych w kilku połączeniach.
-- Implementacja C++ z użyciem biblioteki Boost (http://www.boost.org/).
-- Baza danych: mysql.
-- JSON z użyciem jsoncpp (https://github.com/open-source-parsers/jsoncpp).
+* Do komunikacji z serwerem MySQL użyto biblioteki SOCI (https://github.com/SOCI/soci) autorstwa Macieja Sobczaka 
+* Do zbudowania projektu wykorzystano CMake (https://github.com/Kitware/CMake)
+* Testy napisano w GTest (https://github.com/google/googletest)
