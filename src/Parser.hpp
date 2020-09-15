@@ -1,9 +1,8 @@
-#pragma once
+ // DEL#pragma once
 
 #include <jsoncpp/json/json.h>
 #include <memory>
 #include <string>
-
 
 class Parser {
 public:

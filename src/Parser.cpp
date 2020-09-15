@@ -8,8 +8,8 @@
 
 using namespace std::string_literals;
 
-std::string Parser::OK_ = R"({ "status": "ok" })";
-std::string Parser::notOK_ = R"({ "status": "error" })";
+std::string Parser::OK_ = R"({"status":"ok"})";
+std::string Parser::notOK_ = R"({"status":"error"})";
 
 void Parser::parseToServer(char* messageString) {
     Json::Value root;
@@ -24,7 +24,7 @@ void Parser::parseToServer(char* messageString) {
 
     root["cmd"] = tokens[0];
     if (tokens[0] == "WRITE") {
-        for (int i = 1; i < tokens.size(); ) {
+        for (size_t i = 1; i < tokens.size(); ) {
             root["args"]["key"] = tokens[i];
             root["args"]["value"] = std::stoi(tokens[i + 1]);
             i += 2;
@@ -55,8 +55,8 @@ void Parser::parseToClient(std::unique_ptr<std::string>& output, bool status) {
 
 void Parser::parseToClient(std::unique_ptr<std::string>& output, uint64_t seconds, int queriesReceived) {
     std::stringstream ss;
-    ss << "Server has started " << seconds << " seconds ago and received ";
-    ss << queriesReceived << " queries so far";
+    ss << "The server has started " << seconds << " seconds ago and replied to ";
+    ss << queriesReceived << " queries so far.";
 
     *output = ss.str();
 }
@@ -77,4 +77,5 @@ void Parser::parseToClient(std::unique_ptr<std::string>& output,
     }
 
     *output = fast.write(root);
+    output->pop_back();
 }

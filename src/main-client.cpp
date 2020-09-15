@@ -24,13 +24,13 @@ int main(int argc, char* argv[]) {
         udp::resolver resolver(io_context);
         udp::resolver::results_type endpoints =
             resolver.resolve(udp::v4(), argv[1], argv[2]);
+        std::system("clear");
 
         bool keepGoing = true;
-
         while (keepGoing) {
             char request[MAX_MESSAGE_LENGTH];
             
-            std::cout << "Command line: ";
+            std::cout << "USER   >> ";
             std::cin.getline(request, MAX_MESSAGE_LENGTH);
 
             if (strcmp(request, "END") == 0) {
@@ -39,14 +39,13 @@ int main(int argc, char* argv[]) {
             if (strcmp(request, "STAT") != 0 && strcmp(request, "END") != 0) {
                 Parser::parseToServer(request);
             }
-            std::cout << "Message before sending to server: " << request;
             socket.send_to(boost::asio::buffer(request, MAX_MESSAGE_LENGTH), *endpoints.begin());
 
             udp::endpoint sender_endpoint;
             char reply[MAX_MESSAGE_LENGTH];
             size_t reply_length = socket.receive_from(boost::asio::buffer(reply), sender_endpoint);
         
-            std::cout << "Server reply: ";
+            std::cout << "SERVER >> ";
             std::cout.write(reply, reply_length);
             std::cout << "\n";
         }

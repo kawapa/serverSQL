@@ -21,12 +21,11 @@ public:
     void goSleepFor(int seconds) const;
     void showStatistics();
 
-
 private:
-    ServerSQL& serverSQL_;
-
-    int getQueriesReceived() const;
     int64_t getTimeFromStart() const;
+    int getQueriesReceived() const;
+
+    ServerSQL& serverSQL_;
 
     udp::socket socket_;
     udp::endpoint sender_endpoint_;

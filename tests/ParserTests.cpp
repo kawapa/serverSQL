@@ -2,27 +2,40 @@
 
 #include "Parser.hpp"
 
-#include <soci/soci.h>
-#include <soci/mysql/soci-mysql.h>
+constexpr size_t MAX_MESSAGE_LENGTH = 512;
 
-struct ClassCoordinatesTestSuite : public testing::TestWithParam<std::tuple<Coordinates, Coordinates, bool, int>> {
+struct ParserTests : public ::testing::Test {
+public:
+    ParserTests() {
+        outputString = std::make_unique<std::string>();
+        expectedString = std::make_unique<std::string>();
+    }
+
+    std::unique_ptr<std::string> outputString;
+    std::unique_ptr<std::string> expectedString;
+
+    char outputCharArray[MAX_MESSAGE_LENGTH];
+    char expectedCharArray[MAX_MESSAGE_LENGTH];
 };
 
-TEST_P(ClassParserTestSuite, methodDistance) {
-    session sql(mysql, "db=db user=root password=stokrotka");
-    // auto [first, second, equal, expectedDistance] = GetParam();
-    // auto distance = Coordinates::distance(first, second);
-    
-    // EXPECT_EQ(distance, expectedDistance);
+TEST_F(ParserTests, parseToServerTransformsMessageIntoJSON) {
+    // GIVEN
+    strcpy(outputCharArray, "WRITE Jamie 20");
+
+    // WHEN
+    Parser::parseToServer(outputCharArray);
+
+    // THEN
+    strcpy(expectedCharArray, "{\"args\":{\"key\":\"Jamie\",\"value\":20},\"cmd\":\"WRITE\"}"); 
+
+    ASSERT_TRUE(strcmp(outputCharArray, expectedCharArray));
 }
 
+TEST_F(ParserTests, parseToClientCreatesJSONWithSimpleStatus) {
+    *outputString = "";
 
-INSTANTIATE_TEST_SUITE_P(MyInstantiationName,
-                         ClassParserTestSuite,
-                         testing::Values(
-                             std::make_tuple(Coordinates{0, 5}, Coordinates{0, 5}, true, 0),
-                             std::make_tuple(Coordinates{1, 6}, Coordinates{4, 10}, false, 7),
-                             std::make_tuple(Coordinates{4, 10}, Coordinates{0, 0}, false, 14),
-                             std::make_tuple(Coordinates{10, 10}, Coordinates{2, 5}, false, 13)
-                         )
-);
+    Parser::parseToClient(outputString, true);
+
+    *expectedString = R"({"status":"ok"})";
+    ASSERT_EQ(*outputString, *expectedString);
+}

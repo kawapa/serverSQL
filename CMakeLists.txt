@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Download and unpack googletest at configure time
@@ -37,9 +37,7 @@ endif()
 
 # Now simply link against gtest or gtest_main as needed. Eg
 
-# find_package(jsoncpp REQUIRED)
-
-project(server-client)
+project(serverSQL)
 
 SET(SRC_LIST_SERVER
   src/Parser.cpp
@@ -51,28 +49,27 @@ SET(SRC_LIST_CLIENT
   src/Parser.cpp
 )
 
-# SET(SRC_LIST_TESTS
-# 
-# )
+SET(SRC_LIST_TESTS
+  tests/ParserTests.cpp
+  tests/ServerSQLTests.cpp
+  tests/ServerTests.cpp
+)
 
 include_directories(include
   src
   /usr/include/mariadb
 )
 
+add_compile_options(-Wall -Wextra -Werror -pedantic)
+
 add_executable(server src/main-server.cpp ${SRC_LIST_SERVER})
-target_link_libraries(server PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lboost_system -lboost_thread -lpthread)
+target_link_libraries(server PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lpthread)
 
 add_executable(client src/main-client.cpp ${SRC_LIST_CLIENT})
-target_link_libraries(client PRIVATE -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lboost_system -lboost_thread -lpthread)
+target_link_libraries(client PRIVATE -ljsoncpp -lpthread)
 
+add_executable(${PROJECT_NAME}-ut ${SRC_LIST_TESTS} ${SRC_LIST_SERVER})
+target_link_libraries(${PROJECT_NAME}-ut PRIVATE gtest_main -ljsoncpp -I/usr/include/mysql -lsoci_core -lsoci_mysql -ldl -lmysqlclient -lpthread)
 
-# add_executable(${PROJECT_NAME}-ut ${SRC_LIST_TESTS} ${SRC_LIST})
-
-# target_compile_options(${PROJECT_NAME} PRIVATE)
-# target_compile_options(${PROJECT_NAME}-ut PRIVATE -Wall -Wextra -Werror -pedantic)
-
-# target_link_libraries(${PROJECT_NAME}-ut gtest_main)
-
-# enable_testing()
-# add_test(NAME Tests COMMAND ${PROJECT_NAME}-ut)
+enable_testing()
+add_test(NAME Tests COMMAND ${PROJECT_NAME}-ut)
