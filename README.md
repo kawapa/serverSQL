@@ -13,10 +13,9 @@
 * Instalacja Boost
 * Instalacja SOCI (Instruckja na https://github.com/SOCI/soci)
 
-<br>
-`~/mkdir build`<br>
-`~/cd buid`<br>
-`~/cmake .. && make -j`
+`mkdir build`<br>
+`cd buid`<br>
+`cmake .. && make -j`
 
 ## 2. Uruchomienie serwera
 
@@ -31,15 +30,15 @@
 
 ## 3. Uruchomienie klienta
 
-`~/./client <IP_SERWERA> <PORT>`
+`./client <IP_SERWERA> <PORT>`
 
 ## 4. Uruchomienie testów
 
-`~/./serverSQL-ut`
+`./serverSQL-ut`
 
 Lub:
 
-`~/./ctest -V`
+`./ctest -V`
 
 ## 5. Funkcjonalności
 
