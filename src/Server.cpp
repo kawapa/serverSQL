@@ -55,25 +55,30 @@ void Server::processQuery() {
     std::string cmd = obj_["cmd"].asString();
 
     if (cmd == "WRITE") {
-        serverSQL_.insertNewElement(output_,
-                                    obj_["args"]["key"].asString(),
-                                    obj_["args"]["value"].asInt());       
+        bool inserted = serverSQL_.insertNewElement(obj_["args"]["key"].asString(),
+                                    obj_["args"]["value"].asInt());
+        Parser::parseToClient(output_, inserted);
     }
     else if (cmd == "READ") {
-        serverSQL_.getValue(output_,
-                            obj_["args"]["key"].asString());
+        auto exists = serverSQL_.getValue(obj_["args"]["key"].asString());
+        Parser::parseToClient(output_, cmd, std::to_string(exists.second));
     }
     else if (cmd == "DEL") {
-        serverSQL_.deleteElement(output_,
-                                 obj_["args"]["key"].asString());
+        bool deleted = serverSQL_.deleteElement(obj_["args"]["key"].asString());
+        Parser::parseToClient(output_, deleted);
     }
     else if (cmd == "GET") {
-        serverSQL_.getOccurences(output_,
-                                 obj_["args"]["number"].asUInt());
+        int occurences = serverSQL_.getOccurences(obj_["args"]["number"].asUInt());
+        Parser::parseToClient(output_, cmd, std::to_string(occurences));
     }
     else if (cmd == "INC") {
-        serverSQL_.incrementValue(output_,
-                                  obj_["args"]["number"].asUInt());
+        auto exists = serverSQL_.incrementValue(obj_["args"]["number"].asUInt());
+        if (!exists.first) {
+            Parser::parseToClient(output_, false);
+        }
+        else {
+            Parser::parseToClient(output_, cmd, std::to_string(exists.second));
+        }
     }
     else if (cmd == "SLEEP") {
         goSleepFor(obj_["args"]["delay"].asInt());

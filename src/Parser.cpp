@@ -4,6 +4,7 @@
 #include <cstring>
 #include <iterator>
 #include <sstream>
+#include <vector>
 
 using namespace std::string_literals;
 
