@@ -11,7 +11,7 @@
 ## 1. Instalacja
 
 * Instalacja Boost
-* Instalacja SOCI (Instruckja na https://github.com/SOCI/soci)
+* Instalacja SOCI (Instrukcja na https://github.com/SOCI/soci)
 
 `mkdir build`<br>
 `cd buid`<br>
@@ -19,7 +19,7 @@
 
 ## 2. Uruchomienie serwera
 
-`~/./server <PORT>`
+`./server <PORT>`
 
 **Uwaga!** Do uruchomienia serwera wymagane jest:
 * Podanie loginu i hasła do lokalnego serwera MySQL
