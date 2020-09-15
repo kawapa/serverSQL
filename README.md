@@ -1,6 +1,6 @@
 # Zdalny serwer MySQL <!-- omit in toc -->
 
-- [1. Instalacja:](#1-instalacja)
+- [1. Instalacja](#1-instalacja)
 - [2. Uruchomienie serwera](#2-uruchomienie-serwera)
 - [3. Uruchomienie klienta](#3-uruchomienie-klienta)
 - [4. Uruchomienie testów](#4-uruchomienie-testów)
@@ -8,15 +8,15 @@
 - [6. Warunki](#6-warunki)
 - [7. Inne](#7-inne)
 
-## 1. Instalacja:
+## 1. Instalacja
 
-> `~/mkdir build`<br>
-> `~/cd buid`<br>
-> `~/cmake .. && make -j`
+`~/mkdir build`<br>
+`~/cd buid`<br>
+`~/cmake .. && make -j`
 
 ## 2. Uruchomienie serwera
 
-> `~/./server <PORT>`
+`~/./server <PORT>`
 
 **Uwaga!** Do uruchomienia serwera wymagane jest:
 * Podanie loginu i hasła do lokalnego serwera MySQL
@@ -27,15 +27,15 @@
 
 ## 3. Uruchomienie klienta
 
-> `~/./client <IP_SERWERA> <PORT>`
+`~/./client <IP_SERWERA> <PORT>`
 
 ## 4. Uruchomienie testów
 
-> `~/./serverSQL-ut`
+`~/./serverSQL-ut`
 
 Lub:
 
-> `~/./ctest -V`
+`~/./ctest -V`
 
 ## 5. Funkcjonalności
 
