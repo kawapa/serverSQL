@@ -54,7 +54,7 @@ Serwer...
 ## 6. Warunki
 
 - [x] Serwer musi być przygotowany na równoległy dostęp (odczyt i zapis) do danych w kilku połączeniach
-- [x] Implementacja C++ z użyciem biblioteki Boost (http://www.boost.org/)
+- [x] Implementacja C++ z użyciem biblioteki Boost (http://www.boost.org/) - Boost.Asio
 - [x] Baza danych: mysql
 - [x] JSON z użyciem jsoncpp (https://github.com/open-source-parsers/jsoncpp)
 
