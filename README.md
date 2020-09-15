@@ -10,6 +10,10 @@
 
 ## 1. Instalacja
 
+* Instalacja Boost
+* Instalacja SOCI (Instruckja na https://github.com/SOCI/soci)
+
+<br>
 `~/mkdir build`<br>
 `~/cd buid`<br>
 `~/cmake .. && make -j`
